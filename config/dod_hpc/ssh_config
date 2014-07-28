@@ -1,0 +1,35 @@
+# Apply to all hosts except the DoD HPC network
+Host * !*.hpc.mil
+IdentityFile ~/.ssh/MYPRIVATEKEY_id_rsa
+
+###
+### DoD HPC settings
+###
+Host garnet
+HostName garnet08.erdc.hpc.mil
+
+Host us-erdc
+HostName us.erdc.hpc.mil
+
+Host spirit
+HostName spirit.afrl.hpc.mil
+
+Host us-afrl
+HostName us.afrl.hpc.mil
+
+# Match keyword is only available in the most recent versions of SSH
+Match host *.hpc.mil
+User				mydodhpcusername
+GSSAPIAuthentication		yes
+GSSAPIDelegateCredentials	yes
+GSSAPIKeyExchange		yes
+GSSAPIRenewalForcesRekey	yes
+GSSAPITrustDNS			yes
+PreferredAuthentications	gssapi-with-mic
+Protocol			2
+ForwardX11			yes
+ForwardX11Trusted		yes
+###
+### End of DoD HPC settings
+###
+
