@@ -7,5 +7,8 @@ find it useful though and want to use any of them in a project, I'd appreciate
 a brief mention :-)
 
 * scripts: Miscelaneous shell-ish scripts for things
-  * scripts/set_dpi.sh : Dynamically compute and set the real DPI of all connected monitors using xrandr.
+  * set_dpi.sh : Dynamically compute and set the real DPI of all connected monitors using xrandr.
 
+* cmake:  Miscelaneous CMake things
+  * toolchain :  CMake cross-compiling toolchain files
+    * QNX-armv7le-Toolchain.cmake: Cross compiling to QNX on ARMv7
