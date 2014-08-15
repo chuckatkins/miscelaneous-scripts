@@ -11,10 +11,12 @@ a brief mention :-)
 
 * cmake:  Miscelaneous CMake things
   * toolchain :  CMake cross-compiling toolchain files
-    * QNX-armv7le-Toolchain.cmake: Cross compiling to QNX on ARMv7
-    * CrayPrgEnv-ToolChain.cmake: The Cray Programming Environment
     * Platform: Cross compilation platform files not yet upstream
       * ComputeNodeLinux.cmake: Cray Compute Node Linux based on the Cray environment modules
+    * CrayPrgEnv-ToolChain.cmake: The Cray Programming Environment
+    * QNX-common-ToolChain.cmake: Common to all QNX toolchain files
+    * QNX-armv7le-ToolChain.cmake: Cross compiling to QNX on ARMv7
+    * QNX-x86-ToolChain.cmake: Cross compiling to QNX on x86
 
 * config: Various configuration files for things
   * dod_hpc: Remote access configurations fopr the DoD HPC network
