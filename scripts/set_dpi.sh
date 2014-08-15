@@ -14,7 +14,7 @@
 
 XRANDROPTS="$(xrandr | awk '
   BEGIN{mm2in=25.4}                      # milimeters to inches
-  $2 == "connected" {                    # Only connected monitors
+  $2 == "connected" && $3 ~ /[0-9].*/ {  # Only connected monitors
     Output=$1;                           # Display output port
     patsplit($3,ResPx,/[1-9][0-9]*/);    # Extract pixel dimensions
     match($(NF-2),/[1-9][0-9]*/,ResMmX); # Extract physical X size
