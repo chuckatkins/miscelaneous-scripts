@@ -20,11 +20,16 @@ set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
 # Normally this sort of logic would belong in the toolchain file but the
 # order things get loaded in cause anything set here to override the toolchain
 # so we'll explicitly check for static compiler options in order to specify
-# whether or not the platform will support it
-if("$ENV{CRAYPE_LINK_TYPE}" STREQUAL "dynamic")
+# whether or not the platform will support it.
+
+# If the link type is not explicitly specified in the environment then we'll
+# assume that the code will be built statically but that it's dependencies
+# can be mixed
+if(NOT DEFINED ENV{CRAYPE_LINK_TYPE} OR
+   "$ENV{CRAYPE_LINK_TYPE}" STREQUAL "dynamic")
   set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
-else()
+else() # Explicit static
   set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif()
@@ -37,9 +42,13 @@ endif()
 # Set up system search paths that CMake will use to look for libraries and
 # include files.  These will be the standard UNIX search paths but rooted
 # in the SYSROOT of the computes nodes.
+#
+# There is often some confusion on how to set these.  By setting them to BOTH,
+# The re-rooted paths are searched, plus the fully specified paths.  If they
+# were set to ONLY, then only the re-rooted paths would be searched.
 include(Platform/UnixPaths)
 set(CMAKE_FIND_ROOT_PATH "$ENV{SYSROOT_DIR}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)

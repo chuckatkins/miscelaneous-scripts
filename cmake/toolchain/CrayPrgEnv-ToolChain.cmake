@@ -23,8 +23,7 @@ if(DEFINED ENV{CRAYPE_COMPILE_TARGET})
 endif()
 if("$ENV{CRAYPE_LINK_TYPE}" STREQUAL "dynamic")
   set(_CRAY_LINK_OPTS "-dynamic")
-else()
-  # The default behavior if not specified is explicit static-only linkage
+else() # Explicit or implicit static
   set(_CRAY_LINK_OPTS "-static")
 endif()
 
