@@ -1,0 +1,43 @@
+###
+### OLCF Settings
+###
+Host titan
+HostName titan.ccs.ornl.gov
+
+Host lens
+HostName lens.ccs.ornl.gov
+
+Host eos
+HostName eos.ccs.ornl.gov
+
+Host everest
+HostName everest.ccs.ornl.gov
+
+Host smoky
+HostName smoky.ccs.ornl.gov
+
+Host sith
+HostName sith.ccs.ornl.gov
+
+Match host *.ornl.gov
+User				atkins3
+PreferredAuthentications	keyboard-interactive,password
+###
+### End OLCF Settings
+###
+
+###
+### Begin ALCF Settings
+###
+Host mira
+HostName mira.alcf.anl.gov
+
+Host tukey
+HostName mira.alcf.anl.gov
+
+Match host *.anl.gov
+User				catkins
+PreferredAuthentications	keyboard-interactive,password
+###
+### End OLCF Settings
+###
