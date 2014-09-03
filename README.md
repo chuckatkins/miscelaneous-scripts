@@ -14,6 +14,11 @@ a brief mention :-)
     * QNX-common-ToolChain.cmake: Common to all QNX toolchain files
     * QNX-armv7le-ToolChain.cmake: Cross compiling to QNX on ARMv7
     * QNX-x86-ToolChain.cmake: Cross compiling to QNX on x86
+  * adios : CMake things for the ADIOS library
+    * titan : CMake files for building ADIOS on Titan
+      * configure.gnu : Shell script to configure ADIOS with CMake and GCC
+      * configure.intel : Shell script to configure ADIOS with CMake and Intel
+      * configure.pgi : Shell script to configure ADIOS with CMake PGI
 
 * config: Various configuration files for things
   * dod_hpc: Remote access configurations fopr the DoD HPC network
