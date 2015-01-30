@@ -16,9 +16,12 @@ public:
     std::cout << "Creating udp socket on " << this->Port << std::endl;
     this->StartReciever();
   }
+
   ~udp_reciever()
   {
     std::cout << "Killing udp socket on " << this->Port << std::endl;
+
+    // This aborts any currently pending async operations
     this->Socket.cancel();
   }
 
@@ -34,14 +37,20 @@ private:
 
   void Reciever(const boost::system::error_code& error, std::size_t n)
   {
+    // This will error out when cancel is called but I suppose other error
+    // conditions could occur.  Probably best to check for specific error
+    // codes and handle each accordingly.
     if(error)
       {
       //std::cout << " Error code: " << error << std::endl;
       return;
       }
 
+    // Just dump the data to stdout. Insert your own logic here.
     std::string msg(this->Buf, n);
     std::cout << "Port" << this->Port << ": " << msg << std::endl;
+
+    // Keep it alive
     this->StartReciever();
   }
 
@@ -86,6 +95,8 @@ int main(int argc, char **argv)
   {
     udp_reciever u1(io, p1);
     udp_reciever u2(io, p2);
+
+    std::cout << "Type q to stop the sockets" << std::endl;
     std::string input;
     while(input != "q")
     {
@@ -97,6 +108,8 @@ int main(int argc, char **argv)
   {
     udp_reciever u1(io, p1+100);
     udp_reciever u2(io, p2+100);
+
+    std::cout << "Type q to stop the sockets" << std::endl;
     std::string input;
     while(input != "q")
     {
@@ -110,6 +123,5 @@ int main(int argc, char **argv)
   std::cout << "Waiting for IO service to exit..." << std::endl;
   t.join();
   
-
   return 0;
 }
