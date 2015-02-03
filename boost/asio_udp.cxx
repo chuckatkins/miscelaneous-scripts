@@ -10,7 +10,7 @@ class udp_receiver
 {
 public:
   udp_receiver(boost::asio::io_service& io, int p)
-  : IsReceiving(false), Port(p),
+  : IsReceiving(false), ShouldStop(false), Port(p),
     Socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), p))
   {
     std::cout << "Port[" << this->Port << "] Ctor : "
@@ -29,6 +29,7 @@ public:
               << "Waiting for receiver to stop" << std::endl;
       {
       boost::unique_lock<boost::mutex> guard(this->IsReceivingMtx);
+      this->ShouldStop = true;
       while(this->IsReceiving)
         {
         this->IsReceivingCond.wait(guard);
@@ -62,7 +63,7 @@ private:
     // This will error out when cancel is called but I suppose other error
     // conditions could occur.  Probably best to check for specific error
     // codes and handle each accordingly.
-    if(error)
+    if(error || this->ShouldStop)
       {
       //std::cout << " Error code: " << error << std::endl;
       std::cout << "Port[" << this->Port << "] Recv : "
@@ -87,6 +88,7 @@ private:
   }
 
   bool IsReceiving;
+  bool ShouldStop;
   boost::mutex IsReceivingMtx;
   boost::condition_variable IsReceivingCond;
 
