@@ -4,38 +4,60 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
-#include <boost/optional.hpp>
+#include <boost/smart_ptr.hpp>
 
-class udp_reciever
+class udp_receiver
 {
 public:
-  udp_reciever(boost::asio::io_service& io, int p)
-  : Port(p),
+  udp_receiver(boost::asio::io_service& io, int p)
+  : IsReceiving(false), Port(p),
     Socket(io, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), p))
   {
-    std::cout << "Creating udp socket on " << this->Port << std::endl;
-    this->StartReciever();
+    std::cout << "Port[" << this->Port << "] Ctor : "
+              << "Creating udp socket" << std::endl;
+    this->StartReceiver();
   }
 
-  ~udp_reciever()
+  ~udp_receiver()
   {
-    std::cout << "Killing udp socket on " << this->Port << std::endl;
-
     // This aborts any currently pending async operations
+    std::cout << "Port[" << this->Port << "] Dtor : "
+              << "Aborting receiver" << std::endl;
     this->Socket.cancel();
+
+    std::cout << "Port[" << this->Port << "] Dtor : "
+              << "Waiting for receiver to stop" << std::endl;
+      {
+      boost::unique_lock<boost::mutex> guard(this->IsReceivingMtx);
+      while(this->IsReceiving)
+        {
+        this->IsReceivingCond.wait(guard);
+        }
+      }
+
+    std::cout << "Port[" << this->Port << "] Dtor : "
+              << "Deleting" << std::endl;
   }
 
 private:
-  void StartReciever()
+  void StartReceiver()
   {
+    std::cout << "Port[" << this->Port << "] Strt : "
+              << "(Re)Starting receiver" << std::endl;
+
+      {
+      boost::lock_guard<boost::mutex> guard(this->IsReceivingMtx);
+      this->IsReceiving = true;
+      }
+
     this->Socket.async_receive_from(
       boost::asio::buffer(this->Buf, 256), this->Remote,
-      boost::bind(&udp_reciever::Reciever, this,
+      boost::bind(&udp_receiver::Receiver, this,
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
   }
 
-  void Reciever(const boost::system::error_code& error, std::size_t n)
+  void Receiver(const boost::system::error_code& error, std::size_t n)
   {
     // This will error out when cancel is called but I suppose other error
     // conditions could occur.  Probably best to check for specific error
@@ -43,16 +65,30 @@ private:
     if(error)
       {
       //std::cout << " Error code: " << error << std::endl;
+      std::cout << "Port[" << this->Port << "] Recv : "
+                << "Stopping receiver" << std::endl;
+
+        {
+        boost::lock_guard<boost::mutex> guard(this->IsReceivingMtx);
+        this->IsReceiving = false;
+        }
+      this->IsReceivingCond.notify_one();
+
       return;
       }
 
     // Just dump the data to stdout. Insert your own logic here.
     std::string msg(this->Buf, n);
-    std::cout << "Port" << this->Port << ": " << msg << std::endl;
+    std::cout << "Port[" << this->Port << "] Recv : "
+              << msg.size() << " bytes received" << std::endl;
 
     // Keep it alive
-    this->StartReciever();
+    this->StartReceiver();
   }
+
+  bool IsReceiving;
+  boost::mutex IsReceivingMtx;
+  boost::condition_variable IsReceivingCond;
 
   int Port;
   char Buf[256];
@@ -85,40 +121,30 @@ int main(int argc, char **argv)
   boost::asio::io_service io;
 
   std::cout << "Creating dummy work for the io_service..." << std::endl;
-  boost::asio::io_service::work *w = new boost::asio::io_service::work(io);
+  boost::scoped_ptr<boost::asio::io_service::work> w(
+    new boost::asio::io_service::work(io));
 
   // This thread will stay active until we clear the dummy work
   // regardless of the lifetime of sockets coming and going
   std::cout << "Launching run thread..." << std::endl;
   boost::thread t(boost::bind(&boost::asio::io_service::run, &io));
 
-  {
-    udp_reciever u1(io, p1);
-    udp_reciever u2(io, p2);
+  boost::scoped_ptr<udp_receiver> u1(new udp_receiver(io, p1));
+  boost::scoped_ptr<udp_receiver> u2(new udp_receiver(io, p2));
 
-    std::cout << "Type q to stop the sockets" << std::endl;
-    std::string input;
-    while(input != "q")
+  std::cout << "Type q to stop the sockets" << std::endl;
+  std::string input;
+  while(input != "q")
     {
     std::getline(std::cin, input);
     }
-  }
 
-  // io_service is still alive so let's start some more sockets
-  {
-    udp_reciever u1(io, p1+100);
-    udp_reciever u2(io, p2+100);
-
-    std::cout << "Type q to stop the sockets" << std::endl;
-    std::string input;
-    while(input != "q")
-    {
-    std::getline(std::cin, input);
-    }
-  }
-
+  std::cout << "DELETE" << std::endl;
+  u1.reset();
+  u2.reset();
+  
   std::cout << "Deleting the dummy work to shutdown..." << std::endl;
-  delete w;
+  w.reset();
 
   std::cout << "Waiting for IO service to exit..." << std::endl;
   t.join();
