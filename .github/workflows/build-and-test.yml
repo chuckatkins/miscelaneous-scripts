@@ -1,0 +1,36 @@
+name: GitHub Actions
+
+on: 
+  push: 
+    branches: 
+    - master 
+  pull_request: 
+    branches: 
+    - master 
+
+jobs:
+  linux_spack:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_YML_JOBNAME: ${{ matrix.jobname }}
+      GH_YML_OS: Linux
+
+    strategy:
+      fail-fast: false
+      matrix:
+        jobname: [
+          el7-spack-openmpi ]
+        include:
+        - jobname: el7-spack-openmpi
+          container: ornladios/adios2:el7-spack-openmpi
+
+    container: ${{ matrix.container }}
+
+    defaults:
+      run:
+        shell: bash -e -c "source /etc/profile.d/spack.sh && spack env activate adios2-ci && sh -e {0}"
+
+    steps:
+    - name: env
+      run: env | sort
