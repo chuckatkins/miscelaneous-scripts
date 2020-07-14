@@ -19,10 +19,3 @@ a brief mention :-)
       * configure.gnu : Shell script to configure ADIOS with CMake and GCC
       * configure.intel : Shell script to configure ADIOS with CMake and Intel
       * configure.pgi : Shell script to configure ADIOS with CMake PGI
-
-* config: Various configuration files for things
-  * dod_hpc: Remote access configurations for the DoD HPC network
-    * krb.conf: User Kerberos configuration file
-    * ssh_config: User SSH config file
-  * doe_hpc: Remote access configurations for the DoE HPC network
-    * ssh_config: User SSH config file
