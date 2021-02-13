@@ -14,3 +14,12 @@ jobs:
     steps:
     - name: Hello World
       run: echo "Hello World"
+
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup upterm session
+      uses: lhotari/action-upterm@v1
+    - name: Sleep 60s
+      run: sleep 60 
